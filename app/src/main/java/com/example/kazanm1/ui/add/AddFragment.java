@@ -34,8 +34,6 @@ public class AddFragment extends Fragment {
     private AddFragmentBinding binding;
 
     private AddViewModel viewModel;
-
-
     private List<RockTypeEntity> rocks;
 
 
@@ -63,7 +61,24 @@ public class AddFragment extends Fragment {
         });
 
         List<WellLayerItem> rLayerItems = new ArrayList<>();
-        AdapterWellLayer adapterWellLayer = new AdapterWellLayer(rLayerItems, rLayerItems::remove);
+        AdapterWellLayer adapterWellLayer = new AdapterWellLayer(rLayerItems, wellLayerItem -> rLayerItems.remove(wellLayerItem));
+
+        if (getArguments().getLong("id", 0) != 0) {
+            viewModel.init(getArguments().getLong("id", 0));
+            viewModel.getWell().observe(getViewLifecycleOwner(), model -> {
+                binding.wellName.setText(model.getWell().getWellName());
+                binding.depthOfGas.setText(model.getWell().getGasOilDepth() + "");
+                binding.wellCapacity.setText(model.getWell().getCapacity() + "");
+                if (rLayerItems.isEmpty()) {
+                    for (int i = 0; i < model.getWellLayers().size(); i++) {
+                        rLayerItems.add(new WellLayerItem(model.getWellLayers().get(i).getWellLayer().getStartPoint(), model.getWellLayers().get(i).getWellLayer().getEndPoint(), model.getWellLayers().get(i).getRockType().getID(), model.getWellLayers().get(i).getRockType().getName()));
+                    }
+                    adapterWellLayer.notifyDataSetChanged();
+
+                }
+            });
+        }
+
         binding.rec.setAdapter(adapterWellLayer);
         binding.rec.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -94,17 +109,23 @@ public class AddFragment extends Fragment {
                 Toast.makeText(getContext(), "Please Fill All", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (rLayerItems.isEmpty()){
+            if (rLayerItems.isEmpty()) {
                 Toast.makeText(getContext(), "Please Fill All", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+
             try {
-                viewModel.addLayerWell(rLayerItems,viewModel.addWell(new WellEntity(0,1,binding.wellName.getText().toString().trim(),Long.parseLong(binding.depthOfGas.getText().toString().trim()),Long.parseLong(binding.wellCapacity.getText().toString().trim()))));
+                if (getArguments().getLong("id", 0) == 0)
+                    viewModel.addLayerWell(rLayerItems, viewModel.addWell(new WellEntity(0, 1, binding.wellName.getText().toString().trim(), Long.parseLong(binding.depthOfGas.getText().toString().trim()), Long.parseLong(binding.wellCapacity.getText().toString().trim()))));
+                else {
+                    viewModel.addWell(new WellEntity(getArguments().getLong("id", 0), 1, binding.wellName.getText().toString().trim(), Long.parseLong(binding.depthOfGas.getText().toString().trim()), Long.parseLong(binding.wellCapacity.getText().toString().trim())));
+                    viewModel.addLayerWell(rLayerItems, getArguments().getLong("id", 0));
+                }
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
-            e.printStackTrace();
+                e.printStackTrace();
             }
 
             Navigation.findNavController(v).popBackStack();

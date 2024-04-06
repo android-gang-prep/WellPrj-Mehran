@@ -21,4 +21,6 @@ public interface WellLayerDao {
     @Delete
     void deleteWell(WellLayerEntity well);
 
+    @Query("DELETE FROM welllayers where WellID=:id")
+    void delete(long id);
 }

@@ -18,6 +18,12 @@
     <fragment
         android:id="@+id/addFragment"
         android:name="com.example.kazanm1.ui.add.AddFragment"
-        android:label="AddFragment" />
+        android:label="AddFragment">
+
+        <argument
+            android:name="id"
+            app:argType="long"
+            android:defaultValue="0L" />
+    </fragment>
 
 </navigation>

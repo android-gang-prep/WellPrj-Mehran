@@ -78,5 +78,11 @@ public class HomeFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_addFragment);
         });
 
+        binding.edit.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putLong("id",wellModels.get(binding.well.getSelectedItemPosition()).getWell().getID());
+            Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_addFragment,bundle);
+        });
+
     }
 }

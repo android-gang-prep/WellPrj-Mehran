@@ -23,4 +23,6 @@ public interface WellDao {
 
     @Query("SELECT * From wells")
     LiveData<List<WellModel>> getWells();
+    @Query("SELECT * From wells where ID=:id")
+    LiveData<WellModel> getWell(long id);
 }

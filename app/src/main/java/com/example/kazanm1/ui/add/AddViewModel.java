@@ -36,6 +36,11 @@ public class AddViewModel extends AndroidViewModel {
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public long addWell(WellEntity well) throws ExecutionException, InterruptedException {
+        if (well.getID() != 0) {
+            appDatabase.wellLayerDao().delete(well.getID());
+            executorService.submit(() -> appDatabase.wellDao().updateWell(well));
+            return well.getID();
+        }
         Callable<Long> callable = () -> appDatabase.wellDao().insert(well);
 
         Future<Long> future = executorService.submit(callable);
@@ -53,6 +58,11 @@ public class AddViewModel extends AndroidViewModel {
             appDatabase.wellLayerDao().insertWell(wellLayer);
 
         });
+    }
+
+
+    public void init(long id) {
+        well = appDatabase.wellDao().getWell(id);
     }
 
     public LiveData<WellModel> getWell() {
